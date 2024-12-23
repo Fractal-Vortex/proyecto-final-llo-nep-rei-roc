@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from api.utils import APIException, generate_sitemap
-from api.models import db
+from api.models import db, Users, Rutas, Categorias, Eventos, Rutas_eventos, Favorites
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
@@ -48,7 +48,6 @@ def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
 # generate sitemap with all your endpoints
-
 
 @app.route('/')
 def sitemap():
