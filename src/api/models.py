@@ -1,4 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy, datetime
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, timezone
 from sqlalchemy import Column, ForeignKey, Integer, String, Enum
 from sqlalchemy.orm import relationship, declarative_base
 
@@ -132,13 +133,13 @@ class Comentarios(db.Model):
     __tablename__ = 'comentarios'
     id = db.Column(db.Integer, primary_key=True)
     comentario = db.Column(db.Text, nullable=True)
-    fecha_creacion = db.Column(db.DateTime, nullable=False)
+    fecha_creacion = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
     tipo = db.Column(db.String(120), nullable=False)
-    from_id = Column(Integer, ForeignKey('users.id'))
-    to_id = Column(Integer, ForeignKey('users.id'))
+    from_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    to_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    from_user = relationship('Users', foreign_keys=[from_id], backref="comentarios_realizados")
-    to_user = relationship('Users', foreign_keys=[to_id], backref="comentarios_recibidos")
+    from_user = db.relationship('Users', foreign_keys=[from_id], backref="comentarios_realizados")
+    to_user = db.relationship('Users', foreign_keys=[to_id], backref="comentarios_recibidos")
 
     def __repr__(self):
         return f'<Comentarios {self.id}>'
@@ -158,8 +159,8 @@ class Valoraciones(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     valoracion = db.Column(db.Float, nullable=True)
     tipo = db.Column(db.String(120), nullable=False)
-    from_id = Column(Integer, ForeignKey('users.id'))
-    to_id = Column(Integer, ForeignKey('users.id'))
+    from_id = db.Column(db.Integer, ForeignKey('users.id'))
+    to_id = db.Column(db.Integer, ForeignKey('users.id'))
 
     from_user = relationship('Users', foreign_keys=[from_id], backref="valoraciones_realizados")
     to_user = relationship('Users', foreign_keys=[to_id], backref="valoraciones_recibidos")
@@ -167,12 +168,14 @@ class Valoraciones(db.Model):
     def __repr__(self):
         return f'<Valoraciones {self.id}>'
 
-   def serialize(self):
+    def serialize(self):
         return {
             "id": self.id,
             "valoracion": self.valoracion,
             "tipo": self.tipo,
             "from_id": self.from_id,
             "to_id": self.to_id,
+            "from_user": self.from_user.serialize() if self.from_user else None, 
+            "to_user": self.to_user.serialize() if self.to_user else None
         }
 
