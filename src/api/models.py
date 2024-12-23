@@ -8,16 +8,18 @@ db = SQLAlchemy()
 class Users(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
+    user = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
 
     def __repr__(self):
-        return f'<Users {self.email}>'
+        return f'<Users {self.user}>'
 
     def serialize(self):
         return {
             "id": self.id,
+            "user": self.user,
             "email": self.email,
         }
 
@@ -31,8 +33,8 @@ class Rutas(db.Model):
     fecha_creada = db.Column(db.Date, nullable=False)
     fecha_inicio = db.Column(db.Date, nullable=False)
 
-    user = relationship('Users', foreign_keys=[usuario_id], backref="rutas")
-    categoria = relationship('Categorias', foreign_keys=[category_id], backref="rutas")
+    user = db.relationship('Users', foreign_keys=[usuario_id], backref="rutas")
+    categoria = db.relationship('Categorias', foreign_keys=[category_id], backref="rutas")
 
     def __repr__(self):
         return f'<Rutas {self.titulo}>'
@@ -72,8 +74,8 @@ class Eventos(db.Model):
     category_id = db.Column(db.Integer, ForeignKey("categorias.id"), nullable=False)
     rutas_id = db.Column(db.Integer, ForeignKey("rutas.id"), nullable=False)
 
-    categoria = relationship('Categorias', backref="eventos")
-    ruta = relationship('Rutas', backref="eventos")
+    categoria = db.relationship('Categorias', backref="eventos")
+    ruta = db.relationship('Rutas', backref="eventos")
 
     def __repr__(self):
         return f'<Eventos {self.titulo}>'
@@ -84,7 +86,7 @@ class Eventos(db.Model):
             "titulo": self.titulo,
             "detalles": self.detalles,
             "tipo": self.tipo,
-            "fecha": self.fecha.isoformat() if self.fecha else None,
+            "fecha": self.fecha,
             "category_id": self.category_id,
             "rutas_id": self.rutas_id
         }
@@ -95,8 +97,8 @@ class Rutas_eventos(db.Model):
     ruta_id = db.Column(db.Integer, ForeignKey("rutas.id"), nullable=False)
     evento_id = db.Column(db.Integer, ForeignKey("eventos.id"), nullable=False)
 
-    ruta = relationship("Rutas", backref="rutas_eventos")
-    evento = relationship("Eventos", backref="rutas_eventos")
+    ruta = db.relationship("Rutas", backref="rutas_eventos")
+    evento = db.relationship("Eventos", backref="rutas_eventos")
 
     def __repr__(self):
         return f'<Rutas_eventos {self.id}>'
@@ -132,11 +134,11 @@ class Favorites(db.Model):
 class Comentarios(db.Model):
     __tablename__ = 'comentarios'
     id = db.Column(db.Integer, primary_key=True)
-    comentario = db.Column(db.Text, nullable=True)
     fecha_creacion = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
+    comentario = db.Column(db.Text, nullable=True)
     tipo = db.Column(db.String(120), nullable=False)
-    from_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     to_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    from_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     from_user = db.relationship('Users', foreign_keys=[from_id], backref="comentarios_realizados")
     to_user = db.relationship('Users', foreign_keys=[to_id], backref="comentarios_recibidos")
@@ -150,8 +152,8 @@ class Comentarios(db.Model):
             "comentario": self.comentario,
             "fecha_creacion": self.fecha_creacion.isoformat() if self.fecha_creacion else None,
             "tipo": self.tipo,
-            "from_id": self.from_id,
             "to_id": self.to_id,
+            "from_id": self.from_id,
         }
 
 class Valoraciones(db.Model):
@@ -159,11 +161,11 @@ class Valoraciones(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     valoracion = db.Column(db.Float, nullable=True)
     tipo = db.Column(db.String(120), nullable=False)
-    from_id = db.Column(db.Integer, ForeignKey('users.id'))
-    to_id = db.Column(db.Integer, ForeignKey('users.id'))
+    to_id = db.Column(db.Integer, ForeignKey('rutas.id'), nullable=False)
+    from_id = db.Column(db.Integer, ForeignKey('users.id'), nullable=False)
 
-    from_user = relationship('Users', foreign_keys=[from_id], backref="valoraciones_realizados")
-    to_user = relationship('Users', foreign_keys=[to_id], backref="valoraciones_recibidos")
+    from_user = db.relationship('Users', foreign_keys=[from_id], backref="valoraciones_realizadas")
+    to_ruta = db.relationship('Rutas', foreign_keys=[to_id], backref="valoraciones_recibidas")
 
     def __repr__(self):
         return f'<Valoraciones {self.id}>'
@@ -175,7 +177,5 @@ class Valoraciones(db.Model):
             "tipo": self.tipo,
             "from_id": self.from_id,
             "to_id": self.to_id,
-            "from_user": self.from_user.serialize() if self.from_user else None, 
-            "to_user": self.to_user.serialize() if self.to_user else None
         }
 
