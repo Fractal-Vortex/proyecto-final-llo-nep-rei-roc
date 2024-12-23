@@ -1,6 +1,6 @@
 
 import click
-from api.models import db, User
+from api.models import db, Users
 
 """
 In this file, you can add as many commands as you want using the @app.cli.command decorator
@@ -8,7 +8,7 @@ Flask commands are usefull to run cronjobs or tasks outside of the API but sill 
 with youy database, for example: Import the price of bitcoin every night as 12am
 """
 def setup_commands(app):
-    
+
     """ 
     This is an example command "insert-test-users" that you can run from the command line
     by typing: $ flask insert-test-users 5
@@ -19,7 +19,7 @@ def setup_commands(app):
     def insert_test_users(count):
         print("Creating test users")
         for x in range(1, int(count) + 1):
-            user = User()
+            user = Users()
             user.email = "test_user" + str(x) + "@test.com"
             user.password = "123456"
             user.is_active = True
@@ -32,3 +32,4 @@ def setup_commands(app):
     @app.cli.command("insert-test-data")
     def insert_test_data():
         pass
+

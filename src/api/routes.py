@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User
+from api.models import db, Users, Rutas, Categorias, Eventos, Rutas_eventos, Favorites
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
@@ -20,3 +20,38 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+@api.route('/user/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = Users.query.get(user_id)
+    
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({"message": f"User {user.email} deleted successfully"}), 200
+
+@api.route('/user/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    user = Users.query.get(user_id)
+    
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json()
+
+    if "email" in data:
+        user.email = data["email"]
+    if "password" in data:
+        user.password = data["password"]
+    if "is_active" in data:
+        user.is_active = data["is_active"]
+
+    db.session.commit()
+
+    return jsonify({
+        "message": f"User {user.email} updated successfully",
+        "user": user.serialize()
+    }), 200
