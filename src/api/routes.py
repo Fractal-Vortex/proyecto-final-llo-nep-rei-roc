@@ -20,3 +20,23 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+# Obtener todos los eventos
+@api.route('/eventos', methods=['GET'])
+def get_all_events():
+    data = Eventos.query.all()
+    data = [user.serialize() for user in data]
+    return jsonify({"msg": "Eventos obtenidos correctamente" , "payload": data})
+
+# Obtener un evento
+@api.route('/eventos/<int:id>', methods=['GET'])
+def get_event(id):
+    data = Eventos.query.get(id)
+    if not data:
+        return jsonify({"msg": "Eventono encontrado"}), 404
+    return jsonify({"msg": "Evento obtenido correctamente", "payload": data.serialize()})
+
+# Crear un evento
+# Editar un evento
+# Eliminar un evento
+

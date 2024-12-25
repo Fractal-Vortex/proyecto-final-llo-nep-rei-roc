@@ -117,8 +117,8 @@ class Favorites(db.Model):
     rutas_id = db.Column(db.Integer, ForeignKey("rutas.id"), nullable=True)
     eventos_id = db.Column(db.Integer, ForeignKey("eventos.id"), nullable=True)
 
-    ruta = relationship("Rutas", backref="favorites")
-    evento = relationship("Eventos", backref="favorites")
+    ruta = db.relationship("Rutas", backref="favorites")
+    evento = db.relationship("Eventos", backref="favorites")
 
     def __repr__(self):
         return f'<Favorites {self.id}>'
