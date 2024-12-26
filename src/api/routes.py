@@ -60,14 +60,72 @@ def update_user(user_id):
 # Obtener todos los eventos
 @api.route('/eventos', methods=['GET'])
 def get_all_events():
-    data = Eventos.query.all()
-    data = [user.serialize() for user in data]
-    return jsonify({"msg": "Eventos obtenidos correctamente" , "payload": data})
+    try:
+        events = Eventos.query.all()
+        events_serialized = [event.serialize() for event in events]
+        return jsonify({
+            "msg": "Eventos obtenidos correctamente", 
+            "payload": events_serialized
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al obtener eventos",
+            "error": str(e)
+        }), 500
 
-# Obtener un evento
+# Obtener un evento por ID
 @api.route('/eventos/<int:id>', methods=['GET'])
 def get_event(id):
-    data = Eventos.query.get(id)
-    if not data:
-        return jsonify({"msg": "Eventono encontrado"}), 404
-    return jsonify({"msg": "Evento obtenido correctamente", "payload": data.serialize()})
+    try:
+        event = Eventos.query.get(id)
+        if not event:
+            return jsonify({
+                "msg": "Evento no encontrado"
+                }), 404
+        return jsonify({
+            "msg": "Evento obtenido correctamente", 
+            "payload": event.serialize()
+            }), 200
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al obtener el evento",
+            "error": str(e)
+        }), 500
+    
+# Crear un evento
+@api.route('/eventos', methods=['POST'])
+def add_event():
+    try:
+        data = request.get_json()
+        
+        titulo = data.get("titulo")
+        detalles = data.get("detalles")
+        tipo = data.get("tipo")
+        fecha = data.get("fecha")
+        category_id = data.get("category_id")
+        rutas_id = data.get("rutas_id")
+
+        if not all([titulo, detalles, tipo, fecha, category_id, rutas_id]):
+            return jsonify({"msg": "Faltan campos obligatorios"}), 400
+
+        new_event = Eventos(
+            titulo=titulo, 
+            detalles=data.get("detalles"), 
+            tipo=tipo, 
+            fecha=fecha, 
+            category_id=category_id, 
+            rutas_id=rutas_id
+        )
+        db.session.add(new_event)
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Evento creado correctamente",
+            "payload": new_event.serialize()
+        }), 201
+
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al crear el evento", 
+            "error": str(e)
+        }), 500
