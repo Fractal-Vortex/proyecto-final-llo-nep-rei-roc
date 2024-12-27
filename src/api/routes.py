@@ -56,7 +56,7 @@ def update_user(user_id):
         "user": user.serialize()
     }), 200
 
- develop
+
 
 # Obtener todos los eventos
 @api.route('/eventos', methods=['GET'])
@@ -180,7 +180,6 @@ def update_event(id):
             "error": str(e)
         }), 500
 
-=======
 # Endpoints de las rutas --->
 
 @api.route('/rutas', methods=['POST'])
@@ -242,4 +241,4 @@ def eliminar_ruta(ruta_id):
         return jsonify({"message": "Ruta eliminada"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-develop
+
