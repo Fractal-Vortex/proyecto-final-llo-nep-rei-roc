@@ -56,6 +56,131 @@ def update_user(user_id):
         "user": user.serialize()
     }), 200
 
+ develop
+
+# Obtener todos los eventos
+@api.route('/eventos', methods=['GET'])
+def get_all_events():
+    try:
+        events = Eventos.query.all()
+        events_serialized = [event.serialize() for event in events]
+        return jsonify({
+            "msg": "Eventos obtenidos correctamente", 
+            "payload": events_serialized
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al obtener eventos",
+            "error": str(e)
+        }), 500
+
+# Obtener un evento por ID
+@api.route('/eventos/<int:id>', methods=['GET'])
+def get_event(id):
+    try:
+        event = Eventos.query.get(id)
+        if not event:
+            return jsonify({
+                "msg": "Evento no encontrado"
+                }), 404
+        return jsonify({
+            "msg": "Evento obtenido correctamente", 
+            "payload": event.serialize()
+            }), 200
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al obtener el evento",
+            "error": str(e)
+        }), 500
+    
+# Crear un evento
+@api.route('/eventos', methods=['POST'])
+def add_event():
+    try:
+        data = request.get_json()
+        
+        titulo = data.get("titulo")
+        detalles = data.get("detalles")
+        tipo = data.get("tipo")
+        fecha = data.get("fecha")
+        category_id = data.get("category_id")
+        rutas_id = data.get("rutas_id")
+
+        if not all([titulo, detalles, tipo, fecha, category_id, rutas_id]):
+            return jsonify({"msg": "Faltan campos obligatorios"}), 400
+
+        new_event = Eventos(
+            titulo=titulo, 
+            detalles=data.get("detalles"), 
+            tipo=tipo, 
+            fecha=fecha, 
+            category_id=category_id, 
+            rutas_id=rutas_id
+        )
+        db.session.add(new_event)
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Evento creado correctamente",
+            "payload": new_event.serialize()
+        }), 201
+
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al crear el evento", 
+            "error": str(e)
+        }), 500
+
+# Eliminar un evento
+@api.route('/eventos/<int:id>', methods=['DELETE'])
+def delete_event(id):
+    try:
+        event = Eventos.query.get(id)
+        if not event:
+            return jsonify({"msg": "Evento no encontrado"}), 404
+
+        db.session.delete(event)
+        db.session.commit()
+
+        return jsonify({"msg": "Evento eliminado correctamente"}), 200
+
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al eliminar el evento", 
+            "error": str(e)
+        }), 500
+
+# Editar un evento
+@api.route('/eventos/<int:id>', methods=['PUT'])
+def update_event(id):
+    try:
+        data = request.get_json()
+
+        event = Eventos.query.get(id)
+        if not event:
+            return jsonify({"msg": "Evento no encontrado"}), 404
+        
+        event.titulo = data.get("titulo", event.titulo)
+        event.detalles = data.get("detalles", event.detalles)
+        event.tipo = data.get("tipo", event.tipo)
+        event.fecha = data.get("fecha", event.fecha)
+        event.category_id = data.get("category_id", event.category_id)
+        event.rutas_id = data.get("rutas_id", event.rutas_id)
+
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Evento actualizado correctamente",
+            "payload": event.serialize()
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al actualizar el evento", 
+            "error": str(e)
+        }), 500
+
+=======
 # Endpoints de las rutas --->
 
 @api.route('/rutas', methods=['POST'])
@@ -117,3 +242,4 @@ def eliminar_ruta(ruta_id):
         return jsonify({"message": "Ruta eliminada"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+develop
