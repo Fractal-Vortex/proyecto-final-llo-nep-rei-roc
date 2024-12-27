@@ -129,3 +129,53 @@ def add_event():
             "msg": "Error al crear el evento", 
             "error": str(e)
         }), 500
+
+# Eliminar un evento
+@api.route('/eventos/<int:id>', methods=['DELETE'])
+def delete_event(id):
+    try:
+        event = Eventos.query.get(id)
+        if not event:
+            return jsonify({"msg": "Evento no encontrado"}), 404
+
+        db.session.delete(event)
+        db.session.commit()
+
+        return jsonify({"msg": "Evento eliminado correctamente"}), 200
+
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al eliminar el evento", 
+            "error": str(e)
+        }), 500
+
+# Editar un evento
+@api.route('/eventos/<int:id>', methods=['PUT'])
+def update_event(id):
+    try:
+        data = request.get_json()
+
+        event = Eventos.query.get(id)
+        if not event:
+            return jsonify({"msg": "Evento no encontrado"}), 404
+        
+        event.titulo = data.get("titulo", event.titulo)
+        event.detalles = data.get("detalles", event.detalles)
+        event.tipo = data.get("tipo", event.tipo)
+        event.fecha = data.get("fecha", event.fecha)
+        event.category_id = data.get("category_id", event.category_id)
+        event.rutas_id = data.get("rutas_id", event.rutas_id)
+
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Evento actualizado correctamente",
+            "payload": event.serialize()
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "msg": "Error al actualizar el evento", 
+            "error": str(e)
+        }), 500
+
