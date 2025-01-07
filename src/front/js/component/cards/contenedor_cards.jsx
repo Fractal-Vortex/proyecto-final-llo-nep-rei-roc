@@ -1,7 +1,21 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Card_Ruta } from "./card_ruta.jsx";
 
 export const Card_contenor = () => {
+    const scrollRef = useRef(null);
+
+    const scrollLeft = () => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+        }
+    };
+
+    const scrollRight = () => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+        }
+    };
+
     return (
         <div>
             <div className="container mb-4">
@@ -33,29 +47,43 @@ export const Card_contenor = () => {
                     </div>
                 </div>
             </div>
-            <div className="container">
-                <div className="row justify-content-center mb-4">
-                    <div className="col-md-3 d-flex justify-content-center">
-                        <Card_Ruta />
+            <div className="d-none d-md-block">
+                <div className="container">
+                    <div className="row justify-content-center mb-4">
+                        <div className="col-md-3 d-flex justify-content-center">
+                            <Card_Ruta />
+                        </div>
+                        <div className="col-md-3 d-flex justify-content-center">
+                            <Card_Ruta />
+                        </div>
+                        <div className="col-md-3 d-flex justify-content-center">
+                            <Card_Ruta />
+                        </div>
                     </div>
-                    <div className="col-md-3 d-flex justify-content-center">
-                        <Card_Ruta />
-                    </div>
-                    <div className="col-md-3 d-flex justify-content-center">
-                        <Card_Ruta />
+                    <div className="row justify-content-center mb-4">
+                        <div className="col-md-3 d-flex justify-content-center">
+                            <Card_Ruta />
+                        </div>
+                        <div className="col-md-3 d-flex justify-content-center">
+                            <Card_Ruta />
+                        </div>
+                        <div className="col-md-3 d-flex justify-content-center">
+                            <Card_Ruta />
+                        </div>
                     </div>
                 </div>
-                <div className="row justify-content-center mb-4">
-                    <div className="col-md-3 d-flex justify-content-center">
-                        <Card_Ruta />
-                    </div>
-                    <div className="col-md-3 d-flex justify-content-center">
-                        <Card_Ruta />
-                    </div>
-                    <div className="col-md-3 d-flex justify-content-center">
-                        <Card_Ruta />
-                    </div>
+            </div>
+            <div className="d-md-none slider-container">
+                <button className="scroll-btn left" onClick={scrollLeft}>&#10094;</button>
+                <div className="card-slider" ref={scrollRef}>
+                    <div className="card-item"><Card_Ruta /></div>
+                    <div className="card-item"><Card_Ruta /></div>
+                    <div className="card-item"><Card_Ruta /></div>
+                    <div className="card-item"><Card_Ruta /></div>
+                    <div className="card-item"><Card_Ruta /></div>
+                    <div className="card-item"><Card_Ruta /></div>
                 </div>
+                <button className="scroll-btn right" onClick={scrollRight}>&#10095;</button>
             </div>
         </div>
     );
