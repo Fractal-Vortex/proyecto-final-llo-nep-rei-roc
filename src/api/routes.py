@@ -181,6 +181,7 @@ def update_event(id):
         }), 500
 
 
+# Endpoints de las rutas --->
 
 @api.route('/rutas', methods=['POST'])
 def crear_ruta():
