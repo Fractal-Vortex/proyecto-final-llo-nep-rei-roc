@@ -21,54 +21,6 @@ def handle_hello():
 
     return jsonify(response_body), 200
 
-@api.route('/user', methods=['POST'])
-def create_user():
-    try:
-        data = request.get_json()
-
-        email = data.get("email")
-        password = data.get("password")
-        is_active = data.get("is_active", True)
-
-        if not email or not password:
-            return jsonify({"msg": "El email y la contraseña son obligatorios"}), 400
-
-        new_user = Users(
-            email=email,
-            password=password,
-            is_active=is_active
-        )
-
-        db.session.add(new_user)
-        db.session.commit()
-
-        return jsonify({
-            "msg": "Usuario creado correctamente",
-            "payload": new_user.serialize()
-        }), 201
-
-    except Exception as e:
-        return jsonify({
-            "msg": "Error al crear el usuario",
-            "error": str(e)
-        }), 500
-
-@api.route('/user', methods=['GET'])
-def get_all_users():
-    try:
-        users = Users.query.all()
-        users_serialized = [user.serialize() for user in users]
-        return jsonify({
-            "msg": "Usuarios obtenidos correctamente",
-            "payload": users_serialized
-        }), 200
-
-    except Exception as e:
-        return jsonify({
-            "msg": "Error al obtener los usuarios",
-            "error": str(e)
-        }), 500
-
 @api.route('/user/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = Users.query.get(user_id)
