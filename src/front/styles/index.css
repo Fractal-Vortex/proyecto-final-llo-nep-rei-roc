@@ -41,3 +41,8 @@
 .scroll-btn.right {
     right: 0;
 }
+
+.contenedor-tarjetas{
+    width: 100%;
+    height: auto;
+}
