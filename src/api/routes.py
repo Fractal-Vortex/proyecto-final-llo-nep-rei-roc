@@ -242,3 +242,4 @@ def eliminar_ruta(ruta_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
+
