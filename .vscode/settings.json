@@ -8,6 +8,8 @@
         "editor.defaultFormatter": "vscode.html-language-features"
     },
     "[javascript]": {
+    "[javascriptreact]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
+    }
     }
 }
