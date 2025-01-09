@@ -1,0 +1,20 @@
+:root {
+    /* Colores */
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --text-color: #333;
+    --background-color: #f5f5f5;
+
+    /* Tipografía */
+    --font-family-primary: 'Roboto', sans-serif;
+    --font-weight-medium: 500;    /* Peso para Medium */
+    --font-weight-semibold: 600;  /* Peso para SemiBold */
+    --font-weight-bold: 700;      /* Peso para Bold */
+    --font-size-base: 16px;
+    --line-height-base: 1.5;
+
+    /* Espaciados */
+    --spacing-small: 8px;
+    --spacing-medium: 16px;
+    --spacing-large: 24px;
+}
