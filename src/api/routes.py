@@ -57,6 +57,7 @@ def update_user(user_id):
     }), 200
 
 
+
 # Obtener todos los eventos
 @api.route('/eventos', methods=['GET'])
 def get_all_events():
@@ -178,4 +179,67 @@ def update_event(id):
             "msg": "Error al actualizar el evento", 
             "error": str(e)
         }), 500
+
+
+
+@api.route('/rutas', methods=['POST'])
+def crear_ruta():
+    data = request.get_json()
+    try:
+        nueva_ruta = Rutas(
+            titulo=data['titulo'],
+            detalles=data.get('detalles'),
+            usuario_id=data.get('usuario_id'),
+            category_id=data.get('category_id'),
+            fecha_creada=data['fecha_creada'],
+            fecha_inicio=data['fecha_inicio']
+        )
+        db.session.add(nueva_ruta)
+        db.session.commit()
+        return jsonify(nueva_ruta.serialize()), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@api.route('/rutas', methods=['GET'])
+def obtener_rutas():
+    rutas = Rutas.query.all()
+    return jsonify([ruta.serialize() for ruta in rutas]), 200
+
+@api.route('/rutas/<int:ruta_id>', methods=['GET'])
+def obtener_ruta(ruta_id):
+    ruta = Rutas.query.get(ruta_id)
+    if not ruta:
+        return jsonify({"error": "Ruta no encontrada"}), 404
+    return jsonify(ruta.serialize()), 200
+
+@api.route('/rutas/<int:ruta_id>', methods=['PUT'])
+def actualizar_ruta(ruta_id):
+    ruta = Rutas.query.get(ruta_id)
+    if not ruta:
+        return jsonify({"error": "Ruta no encontrada"}), 404
+    data = request.get_json()
+    try:
+        ruta.titulo = data.get('titulo', ruta.titulo)
+        ruta.detalles = data.get('detalles', ruta.detalles)
+        ruta.usuario_id = data.get('usuario_id', ruta.usuario_id)
+        ruta.category_id = data.get('category_id', ruta.category_id)
+        ruta.fecha_creada = data.get('fecha_creada', ruta.fecha_creada)
+        ruta.fecha_inicio = data.get('fecha_inicio', ruta.fecha_inicio)
+        db.session.commit()
+        return jsonify(ruta.serialize()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@api.route('/rutas/<int:ruta_id>', methods=['DELETE'])
+def eliminar_ruta(ruta_id):
+    ruta = Rutas.query.get(ruta_id)
+    if not ruta:
+        return jsonify({"error": "Ruta no encontrada"}), 404
+    try:
+        db.session.delete(ruta)
+        db.session.commit()
+        return jsonify({"message": "Ruta eliminada"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 
