@@ -180,7 +180,7 @@ def update_event(id):
             "error": str(e)
         }), 500
 
-# Endpoints de las rutas --->
+
 
 @api.route('/rutas', methods=['POST'])
 def crear_ruta():
