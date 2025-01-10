@@ -4,3 +4,5 @@
 @import "./base/_base.css";
 @import "./components/_buttons.css";
 @import "./pages/_home.css";
+@import "../styles/components/_footer.css";
+@import "../styles/components/_separator.css";
