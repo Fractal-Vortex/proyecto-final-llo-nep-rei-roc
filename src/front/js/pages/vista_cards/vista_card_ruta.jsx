@@ -6,10 +6,10 @@ import { Button_Blue } from "../../component/buttons/button_blue.jsx";
 
 const Vista_Card_Ruta = () => {
     return (
-        <div className="container" style={{ marginTop: "40px", marginBottom: "40px" }}>
+        <div className="container contenedor_card">
             <div className="row">
                 <div className="col-sm-6">
-                    <img className="img-fluid" src={Imagen} style={{ borderRadius: "8px", width: "auto", height: "660px", objectFit: "cover" }} />
+                    <img className="img-fluid imagen_defecto_card" src={Imagen} />
                 </div>
                 <div className="col-sm-6">
                     <div className="contenedor-tarjetas d-flex flex-column gap-2 justify-content-between h-100">
@@ -36,7 +36,7 @@ const Vista_Card_Ruta = () => {
                             </div>
                             <hr />
                             {/*<div className="d-flex flex-column">*/}
-                            <div className="Rutas d-flex justify-content-between" style={{ width: "100%", height: "auto" }}>
+                            <div className="Rutas d-flex justify-content-between contenedores_secciones">
 
                                 <p className="m-0">Route</p>
 
@@ -45,7 +45,7 @@ const Vista_Card_Ruta = () => {
 
                             </div>
                             <hr />
-                            <div className="Review d-flex justify-content-between" style={{ width: "100%", height: "auto" }}>
+                            <div className="Review d-flex justify-content-between contenedores_secciones">
 
                                 <p className="m-0">Review</p>
 
@@ -54,7 +54,7 @@ const Vista_Card_Ruta = () => {
 
                             </div>
                             <hr />
-                            <div className="Comments_Reviews d-flex justify-content-between" style={{ width: "100%", height: "auto" }}>
+                            <div className="Comments_Reviews d-flex justify-content-between contenedores_secciones">
 
                                 <p className="m-0">Comments & Reviews</p>
 
