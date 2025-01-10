@@ -32,7 +32,7 @@ const Vista_Card_Ruta = () => {
                             </div>
                             <div>
                                 <h1 className="m-0">Bar & Pubs Route</h1>
-                                <h5 className="m-0">@pepe.pe</h5>
+                                <h5 className="m-0">@pepe.pes</h5>
                             </div>
                             <hr />
                             {/*<div className="d-flex flex-column">*/}
