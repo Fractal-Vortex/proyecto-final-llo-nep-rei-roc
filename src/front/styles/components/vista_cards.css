@@ -1,0 +1,16 @@
+.imagen_defecto_card{
+    border-radius: 8px;
+    width: auto;
+    height: 660px;
+    object-fit: cover;
+}
+
+.contenedor_card{
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.contenedores_secciones{
+    width: 100%;
+    height: auto;
+}
