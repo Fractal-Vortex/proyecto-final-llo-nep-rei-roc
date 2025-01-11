@@ -7,17 +7,20 @@ db = SQLAlchemy()
 
 class Users(db.Model):
     __tablename__ = 'users'
-
     id = db.Column(db.Integer, primary_key=True)
+    user = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
+    password = db.Column(db.String(80), unique=False, nullable=False)
+    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+
+    def __repr__(self):
+        return f'<Users {self.user}>'
 
     def serialize(self):
         return {
             "id": self.id,
+            "user": self.user,
             "email": self.email,
-            "is_active": self.is_active
         }
 
 class Rutas(db.Model):
