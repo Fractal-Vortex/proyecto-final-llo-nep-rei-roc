@@ -1,58 +1,72 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint
+from flask import Blueprint, request, jsonify, url_for
 from api.models import db, Users, Rutas, Categorias, Eventos, Rutas_eventos, Favorites
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
+from werkzeug.security import generate_password_hash
+from flask_jwt_extended import create_access_token
+import re
 
 api = Blueprint('api', __name__)
+
+EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
+MSG_MISSING_DATA = "Todos los datos son necesarios"
+MSG_INVALID_DATA = "Datos inválidos"
+MSG_EMAIL_EXISTS = "El correo ya existe!"
+MSG_SUCCESS = "Usuario registrado exitosamente"
 
 # Allow CORS requests to this API
 CORS(api)
 
-
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
-
     response_body = {
         "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
     }
-
     return jsonify(response_body), 200
 
-@api.route('/user', methods=['POST'])
-def create_user():
+
+@api.route('/register', methods=['POST'])
+def register():
+    """
+    Endpoint para registrar un nuevo usuario.
+    Recibe un JSON con 'email' y 'password'.
+    Retorna un token JWT si el registro es exitoso.
+    """
+    email = request.json.get('email', None)
+    password = request.json.get('password', None)
+
+    if not email or not password:
+        return jsonify({"msg": MSG_MISSING_DATA}), 400
+
+    if not isinstance(email, str) or not isinstance(password, str) or not EMAIL_REGEX.match(email):
+        return jsonify({"msg": MSG_INVALID_DATA}), 400
+
+    exists = Users.query.filter_by(email=email).first()
+    if exists:
+        return jsonify({"msg": MSG_EMAIL_EXISTS}), 409
+
     try:
-        data = request.get_json()
-
-        email = data.get("email")
-        password = data.get("password")
-        is_active = data.get("is_active", True)
-
-        if not email or not password:
-            return jsonify({"msg": "El email y la contraseña son obligatorios"}), 400
-
+        hashed_password = generate_password_hash(password)
         new_user = Users(
             email=email,
-            password=password,
-            is_active=is_active
+            password=hashed_password,
+            is_active=True
         )
-
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify({
-            "msg": "Usuario creado correctamente",
-            "payload": new_user.serialize()
-        }), 201
-
+        token = create_access_token(identity=str(new_user.id))
+        return jsonify({"msg": MSG_SUCCESS, "token": token}), 201
     except Exception as e:
-        return jsonify({
-            "msg": "Error al crear el usuario",
-            "error": str(e)
-        }), 500
+        db.session.rollback()
+        return jsonify({"msg": str(e)}), 500
+    
 
+
+  
 @api.route('/user', methods=['GET'])
 def get_all_users():
     try:
@@ -103,7 +117,6 @@ def update_user(user_id):
         "message": f"User {user.email} updated successfully",
         "user": user.serialize()
     }), 200
-
 
 
 # Obtener todos los eventos
