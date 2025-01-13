@@ -150,6 +150,71 @@ def get_user(user_id):
             "error": str(e)
         }), 500
 
+@api.route('/user/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    """
+    Endpoint para actualizar los datos de un usuario existente.
+    """
+    # Buscar el usuario en la base de datos por su ID
+    user = Users.query.get(user_id)
+    
+    if user is None:
+        # Retornar error si el usuario no existe
+        return jsonify({"error": "User not found"}), 404
+
+    # Obtener los datos enviados en el cuerpo de la solicitud
+    data = request.get_json()
+
+    if not data:
+        # Retornar error si no se envían datos
+        return jsonify({"error": "No data provided"}), 400
+
+    # Validar y actualizar el correo electrónico si está presente
+    if "email" in data:
+        if not EMAIL_REGEX.match(data["email"]):
+            # Retornar error si el formato del correo es inválido
+            return jsonify({"error": "Invalid email format"}), 400
+        user.email = data["email"]
+
+    # Validar y actualizar la contraseña si está presente
+    if "password" in data:
+        if not isinstance(data["password"], str) or len(data["password"]) < 8:
+            # Retornar error si la contraseña no cumple con los requisitos mínimos
+            return jsonify({"error": "Password must be at least 8 characters long"}), 400
+        user.password = generate_password_hash(data["password"])  # Hashear la nueva contraseña
+
+    # Validar y actualizar el estado de actividad si está presente
+    if "is_active" in data:
+        if not isinstance(data["is_active"], bool):
+            # Retornar error si el valor de 'is_active' no es un booleano
+            return jsonify({"error": "Invalid value for 'is_active'. Must be a boolean"}), 400
+        user.is_active = data["is_active"]
+
+    # Guardar los cambios en la base de datos
+    try:
+        db.session.commit()
+        # Retornar mensaje de éxito con los datos actualizados del usuario
+        return jsonify({
+            "message": f"User {user.email} updated successfully",
+            "user": user.serialize()
+        }), 200
+    except SQLAlchemyError as e:
+        # Manejo de errores relacionados con la base de datos
+        db.session.rollback()
+        return jsonify({
+            "error": "Database error",
+            "details": str(e)
+        }), 500
+    except Exception as e:
+        # Manejo de errores generales no previstos
+        db.session.rollback()
+        return jsonify({
+            "error": "Unexpected error",
+            "details": str(e)
+        }), 500
+
+
+
 
 
 @api.route('/user/<int:user_id>', methods=['DELETE'])
@@ -164,28 +229,29 @@ def delete_user(user_id):
 
     return jsonify({"message": f"User {user.email} deleted successfully"}), 200
 
-@api.route('/user/<int:user_id>', methods=['PUT'])
-def update_user(user_id):
-    user = Users.query.get(user_id)
+
+# @api.route('/user/<int:user_id>', methods=['PUT'])
+# def update_user(user_id):
+#     user = Users.query.get(user_id)
     
-    if user is None:
-        return jsonify({"error": "User not found"}), 404
+#     if user is None:
+#         return jsonify({"error": "User not found"}), 404
 
-    data = request.get_json()
+#     data = request.get_json()
 
-    if "email" in data:
-        user.email = data["email"]
-    if "password" in data:
-        user.password = data["password"]
-    if "is_active" in data:
-        user.is_active = data["is_active"]
+#     if "email" in data:
+#         user.email = data["email"]
+#     if "password" in data:
+#         user.password = data["password"]
+#     if "is_active" in data:
+#         user.is_active = data["is_active"]
 
-    db.session.commit()
+#     db.session.commit()
 
-    return jsonify({
-        "message": f"User {user.email} updated successfully",
-        "user": user.serialize()
-    }), 200
+#     return jsonify({
+#         "message": f"User {user.email} updated successfully",
+#         "user": user.serialize()
+#     }), 200
 
 
 # Obtener todos los eventos
