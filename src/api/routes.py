@@ -509,3 +509,48 @@ def delete_categoria(categoria_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"msg": str(e)}), 500
+
+# Endpoint para añadir ruta o evento a favoritos
+@api.route('/favorites', methods=['POST'])
+def add_to_favorites():
+    data = request.json
+
+    user_id = data.get('user_id')
+    rutas_id = data.get('rutas_id')
+    eventos_id = data.get('eventos_id')
+
+    # Validar entrada
+    if not user_id or (not rutas_id and not eventos_id):
+        return jsonify({"error": "user_id y al menos uno de rutas_id o eventos_id son requeridos"}), 400
+
+    # Crear favorito
+    favorito = Favorites(user_id=user_id, rutas_id=rutas_id, eventos_id=eventos_id)
+    db.session.add(favorito)
+    db.session.commit()
+
+    return jsonify(favorito.serialize()), 201
+
+
+# Endpoint para obtener todos los favoritos de un usuario
+@api.route('/favorites/<int:user_id>', methods=['GET'])
+def get_user_favorites(user_id):
+    favoritos = Favorites.query.filter_by(user_id=user_id).all()
+
+    if not favoritos:
+        return jsonify({"error": "No se encontraron favoritos para este usuario"}), 404
+
+    return jsonify([favorito.serialize() for favorito in favoritos]), 200
+
+
+# Endpoint para eliminar un favorito
+@api.route('/favorites/<int:id>', methods=['DELETE'])
+def delete_favorite(id):
+    favorito = Favorites.query.get(id)
+
+    if not favorito:
+        return jsonify({"error": "El favorito no existe"}), 404
+
+    db.session.delete(favorito)
+    db.session.commit()
+
+    return jsonify({"message": f"Favorito con ID {id} eliminado exitosamente"}), 200
