@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Blueprint, request, jsonify, url_for
-from api.models import db, Users, Rutas, Categorias, Eventos, Rutas_eventos, Favorites, Comentarios
+from api.models import db, Users, Rutas, Categorias, Eventos, Rutas_eventos, Favorites, Comentarios, Valoraciones
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from sqlalchemy.exc import SQLAlchemyError
@@ -612,3 +612,61 @@ def eliminar_comentario(id):
     db.session.commit()
 
     return jsonify({"message": f"Comentario con ID {id} eliminado exitosamente."}), 200
+
+@api.route('/valoraciones', methods=['POST'])
+def añadir_valoracion():
+    """
+    Permitir añadir una valoración a una ruta.
+    """
+    data = request.get_json()
+
+    # Validación de datos obligatorios
+    if not data or 'valoracion' not in data or 'tipo' not in data or 'to_id' not in data or 'from_id' not in data:
+        return jsonify({"error": "Datos insuficientes. Se requieren 'valoracion', 'tipo', 'to_id' y 'from_id'."}), 400
+
+    # Validar tipo ('ruta')
+    if data['tipo'] != 'ruta':
+        return jsonify({"error": "El tipo debe ser 'ruta'."}), 400
+
+    # Crear una nueva valoración
+    nueva_valoracion = Valoraciones(
+        valoracion=data['valoracion'],
+        tipo=data['tipo'],
+        to_id=data['to_id'],
+        from_id=data['from_id']
+    )
+
+    db.session.add(nueva_valoracion)
+    db.session.commit()
+
+    return jsonify(nueva_valoracion.serialize()), 201
+
+
+@api.route('/valoraciones/<int:ruta_id>', methods=['GET'])
+def obtener_valoraciones(ruta_id):
+    """
+    Recuperar todas las valoraciones de una ruta específica.
+    """
+    # Obtener todas las valoraciones asociadas a una ruta
+    valoraciones = Valoraciones.query.filter_by(to_id=ruta_id).all()
+
+    if not valoraciones:
+        return jsonify({"message": f"No se encontraron valoraciones para la ruta con ID {ruta_id}."}), 404
+
+    return jsonify([valoracion.serialize() for valoracion in valoraciones]), 200
+
+
+@api.route('/valoraciones/<int:id>', methods=['DELETE'])
+def eliminar_valoracion(id):
+    """
+    Eliminar una valoración de una ruta.
+    """
+    valoracion = Valoraciones.query.get(id)
+
+    if not valoracion:
+        return jsonify({"error": f"No se encontró ninguna valoración con ID {id}."}), 404
+
+    db.session.delete(valoracion)
+    db.session.commit()
+
+    return jsonify({"message": f"Valoración con ID {id} eliminada exitosamente."}), 200
