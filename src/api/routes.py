@@ -32,16 +32,17 @@ def handle_hello():
 def register():
     """
     Endpoint para registrar un nuevo usuario.
-    Recibe un JSON con 'email' y 'password'.
+    Recibe un JSON con 'user', 'email' y 'password'.
     Retorna un token JWT si el registro es exitoso.
     """
+    user = request.json.get('user', None)
     email = request.json.get('email', None)
     password = request.json.get('password', None)
 
-    if not email or not password:
+    if not user or not email or not password:
         return jsonify({"msg": MSG_MISSING_DATA}), 400
 
-    if not isinstance(email, str) or not isinstance(password, str) or not EMAIL_REGEX.match(email):
+    if not isinstance(user, str) or not isinstance(email, str) or not isinstance(password, str) or not EMAIL_REGEX.match(email):
         return jsonify({"msg": MSG_INVALID_DATA}), 400
 
     exists = Users.query.filter_by(email=email).first()
@@ -51,6 +52,7 @@ def register():
     try:
         hashed_password = generate_password_hash(password)
         new_user = Users(
+            user=user,  # Ahora se maneja el campo 'user'
             email=email,
             password=hashed_password,
             is_active=True
@@ -63,6 +65,7 @@ def register():
     except Exception as e:
         db.session.rollback()
         return jsonify({"msg": str(e)}), 500
+
     
 
 
