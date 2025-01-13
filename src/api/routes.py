@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Blueprint, request, jsonify, url_for
-from api.models import db, Users, Rutas, Categorias, Eventos, Rutas_eventos, Favorites
+from api.models import db, Users, Rutas, Categorias, Eventos, Rutas_eventos, Favorites, Comentarios
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from sqlalchemy.exc import SQLAlchemyError
@@ -552,3 +552,63 @@ def delete_favorite(id):
     db.session.commit()
 
     return jsonify({"message": f"Favorito con ID {id} eliminado exitosamente"}), 200
+
+@api.route('/comentarios', methods=['POST'])
+def crear_comentario():
+    """
+    Permitir que un usuario cree un comentario sobre una ruta o evento.
+    """
+    data = request.get_json()
+
+    if not data or 'comentario' not in data or 'tipo' not in data or 'to_id' not in data or 'from_id' not in data:
+        return jsonify({"error": "Datos insuficientes. Se requieren 'comentario', 'tipo', 'to_id' y 'from_id'."}), 400
+
+    if data['tipo'] not in ['ruta', 'evento']:
+        return jsonify({"error": "El tipo debe ser 'ruta' o 'evento'."}), 400
+
+    nuevo_comentario = Comentarios(
+        comentario=data['comentario'],
+        tipo=data['tipo'],
+        to_id=data['to_id'],
+        from_id=data['from_id']
+    )
+
+    db.session.add(nuevo_comentario)
+    db.session.commit()
+
+    return jsonify(nuevo_comentario.serialize()), 201
+
+
+@api.route('/comentarios/<int:id>', methods=['GET'])
+def obtener_comentarios(id):
+    """
+    Recuperar comentarios de una ruta o evento específico.
+    """
+    # Validar si es ruta o evento
+    tipo = request.args.get('tipo')
+    if not tipo or tipo not in ['ruta', 'evento']:
+        return jsonify({"error": "Debe especificar el tipo como 'ruta' o 'evento'."}), 400
+
+    # Filtrar comentarios según el tipo y el ID
+    comentarios = Comentarios.query.filter_by(tipo=tipo, to_id=id).all()
+
+    if not comentarios:
+        return jsonify({"message": f"No se encontraron comentarios para el {tipo} con ID {id}."}), 404
+
+    return jsonify([comentario.serialize() for comentario in comentarios]), 200
+
+
+@api.route('/comentarios/<int:id>', methods=['DELETE'])
+def eliminar_comentario(id):
+    """
+    Eliminar un comentario.
+    """
+    comentario = Comentarios.query.get(id)
+
+    if not comentario:
+        return jsonify({"error": f"No se encontró ningún comentario con ID {id}."}), 404
+
+    db.session.delete(comentario)
+    db.session.commit()
+
+    return jsonify({"message": f"Comentario con ID {id} eliminado exitosamente."}), 200
