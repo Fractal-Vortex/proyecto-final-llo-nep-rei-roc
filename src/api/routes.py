@@ -150,6 +150,7 @@ def get_user(user_id):
             "error": str(e)
         }), 500
 
+# Endpoint para editar los datos de usuario.
 @api.route('/user/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     """
@@ -213,21 +214,42 @@ def update_user(user_id):
             "details": str(e)
         }), 500
 
-
-
-
-
+# Endpoint para eliminar usuario por id.
 @api.route('/user/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    user = Users.query.get(user_id)
-    
-    if user is None:
-        return jsonify({"error": "User not found"}), 404
+    """
+    Endpoint para eliminar un usuario por su ID.
+    """
+    try:
+        # Obtener el usuario por ID
+        user = Users.query.get(user_id)
+        
+        # Si no se encuentra el usuario, retornar un mensaje adecuado
+        if not user:
+            return jsonify({"msg": "User not found"}), 404
 
-    db.session.delete(user)
-    db.session.commit()
+        # Eliminar el usuario
+        db.session.delete(user)
+        db.session.commit()
 
-    return jsonify({"message": f"User {user.email} deleted successfully"}), 200
+        return jsonify({
+            "msg": f"User {user_id} deleted successfully"
+        }), 200
+
+    except SQLAlchemyError as e:
+        # Manejo de errores específicos de la base de datos
+        db.session.rollback()
+        return jsonify({
+            "msg": "Error al eliminar el usuario",
+            "error": f"Database query failed: {str(e)}"
+        }), 500
+    except Exception as e:
+        # Manejo de errores generales
+        db.session.rollback()
+        return jsonify({
+            "msg": "Unexpected error",
+            "error": str(e)
+        }), 500
 
 
 # Obtener todos los eventos
