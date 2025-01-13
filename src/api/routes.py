@@ -373,4 +373,73 @@ def eliminar_ruta(ruta_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
+@api.route('/categorias', methods=['POST'])
+def create_categoria():
+    categoria = request.json.get('categoria', None)
 
+    if not categoria:
+        return jsonify({"msg": "El campo 'categoria' es obligatorio"}), 400
+
+    if Categorias.query.filter_by(categoria=categoria).first():
+        return jsonify({"msg": "La categoría ya existe"}), 400
+
+    try:
+        nueva_categoria = Categorias(categoria=categoria)
+        db.session.add(nueva_categoria)
+        db.session.commit()
+        return jsonify(nueva_categoria.serialize()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": str(e)}), 500
+
+
+@api.route('/categorias', methods=['GET'])
+def get_categorias():
+    try:
+        categorias = Categorias.query.all()
+        return jsonify([categoria.serialize() for categoria in categorias]), 200
+    except Exception as e:
+        return jsonify({"msg": str(e)}), 500
+
+@api.route('/categorias/<int:categoria_id>', methods=['GET'])
+def get_categoria_by_id(categoria_id):
+    categoria = Categorias.query.get(categoria_id)
+    if not categoria:
+        return jsonify({"msg": "Categoría no encontrada"}), 404
+    return jsonify(categoria.serialize()), 200
+
+@api.route('/categorias/<int:categoria_id>', methods=['PUT'])
+def update_categoria(categoria_id):
+    categoria = Categorias.query.get(categoria_id)
+    if not categoria:
+        return jsonify({"msg": "Categoría no encontrada"}), 404
+
+    nuevo_nombre = request.json.get('categoria', None)
+
+    if not nuevo_nombre:
+        return jsonify({"msg": "El campo 'categoria' es obligatorio"}), 400
+
+    if Categorias.query.filter(Categorias.categoria == nuevo_nombre, Categorias.id != categoria_id).first():
+        return jsonify({"msg": "La nueva categoría ya existe"}), 400
+
+    try:
+        categoria.categoria = nuevo_nombre
+        db.session.commit()
+        return jsonify(categoria.serialize()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": str(e)}), 500
+    
+@api.route('/categorias/<int:categoria_id>', methods=['DELETE'])
+def delete_categoria(categoria_id):
+    categoria = Categorias.query.get(categoria_id)
+    if not categoria:
+        return jsonify({"msg": "Categoría no encontrada"}), 404
+
+    try:
+        db.session.delete(categoria)
+        db.session.commit()
+        return jsonify({"msg": "Categoría eliminada"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": str(e)}), 500
